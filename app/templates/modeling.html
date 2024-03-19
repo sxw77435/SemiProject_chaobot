@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>bbibot</title>
+</head>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        background-color: #f0f0f0;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+    }
+
+    .chat-container {
+        height: 600px;
+        width: 450px;
+        margin: 0 auto;
+        background-color: #343541;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        padding: 20px;
+        box-sizing: border-box;
+        overflow: hidden;
+        margin-top: 30px;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .chat {
+    flex-grow: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    scrollbar-width: none; /* 隐藏Firefox浏览器的滚动条 */
+    -ms-overflow-style: none; /* 隐藏Internet Explorer浏览器的滚动条 */
+}
+
+    .chat::-webkit-scrollbar {
+        width: 0; /* 隐藏WebKit浏览器的滚动条 */
+    }
+
+    .chat-message {
+        padding: 10px;
+        border-radius: 5px;
+    }
+
+    .user-message {
+        background-color: #d9e2d9;
+        color: #110c0c;
+        align-self: flex-end;
+    }
+
+    .bot-message {
+        background-color: #3162a8;
+        color: #fff;
+        align-self: flex-start;
+        margin-bottom: 20px;
+    }
+
+    .user-input {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+        margin-top: 20px;
+        margin-left: 30px;
+    }
+
+    input[type="text"] {
+        padding: 5px;
+        border: 1px solid #1a1212;
+        border-radius: 5px;
+        width: 80%;
+        border-radius: 25px;
+        height: 30px;
+    }
+
+    button {
+        background-color: #BFC7D5;
+        color: #161010;
+        font-weight: bolder;
+        border: none;
+        border-radius: 50%;
+        height: 50px;
+        padding: 5px 10px;
+        cursor: pointer;
+        margin-left: 20px;
+        margin-right: 10px;
+    }
+    h2{
+        text-align: center;
+    }
+</style>
+<body>
+    <h2>HI~I AM BBITBOT<br><br> HOW CAN I HELP YOU?</h2>
+    <div class="chat-container">
+        <div class="chat" id="chat">
+            <!-- 在对话框中添加消息 -->
+        </div>
+        
+        <!-- 将用户输入框和发送按钮放在 chat-container 内的 user-input 中 -->
+        <div class="user-input">
+            <input type="text" id="userInput" placeholder="sending message...">
+            <button id="sendMessage">send</button>
+        </div>
+    </div>
+    
+    <script>
+        $(document).ready(function () {
+            const chat = $("#chat");
+            const userInput = $("#userInput");
+            const sendMessageButton = $("#sendMessage");
+    
+            sendMessageButton.click(function () {
+                const userMessage = userInput.val();
+    
+                addUserMessage(userMessage);
+    
+                $.ajax({
+                    type: "POST",
+                    url: "/search",
+                    contentType: "application/json; charset=utf-8",
+                    data: JSON.stringify({ ask: userMessage }),
+                    dataType: "json",
+                    success: function (data) {
+                        const botResponse = data.answer;
+    
+                        // Append bot's response to the chat container
+                        addBotMessage(botResponse);
+    
+                        // Scroll to the bottom of the chat
+                        chat.scrollTop(chat[0].scrollHeight);
+                    },
+                    error: function (error) {
+                        console.error("Error:", error);
+                    },
+                });
+    
+                userInput.val("");
+            });
+    
+            function addUserMessage(message) {
+                const userMessageDiv = $("<div>").addClass("chat-message user-message").text(message);
+                chat.append(userMessageDiv);
+    
+                
+                chat.scrollTop(chat[0].scrollHeight);
+            }
+    
+            function addBotMessage(message) {
+                const botMessageDiv = $("<div>").addClass("chat-message bot-message").text(message);
+                chat.append(botMessageDiv);
+    
+                
+                chat.scrollTop(chat[0].scrollHeight);
+            }
+    
+          
+            userInput.keydown(function(event) {
+                if (event.keyCode === 13) { // 13 is the key code for "Enter"
+                    event.preventDefault();
+                    sendMessageButton.click();
+                }
+            });
+        });
+    </script>
+</body>
+</html>
